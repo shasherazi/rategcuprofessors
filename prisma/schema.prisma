@@ -1,0 +1,99 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Department {
+  id         String      @id @default(uuid())
+  name       String
+  code       String      @unique
+  professors Professor[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+model Professor {
+  id               String            @id @default(uuid())
+  name             String
+  email            String?
+  bio              String?
+  departmentId     String
+  department       Department        @relation(fields: [departmentId], references: [id])
+  professorCourses ProfessorCourse[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+}
+
+model Course {
+  id               String            @id @default(uuid())
+  courseCode       String            @unique
+  title            String
+  professorCourses ProfessorCourse[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+}
+
+model ProfessorCourse {
+  id          String    @id @default(uuid())
+  professorId String
+  professor   Professor @relation(fields: [professorId], references: [id])
+  courseId    String
+  course      Course    @relation(fields: [courseId], references: [id])
+  semester    String
+  year        Int
+  ratings     Rating[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([professorId, courseId, semester, year])
+}
+
+model Rating {
+  id                  String          @id @default(uuid())
+  professorCourseId   String
+  professorCourse     ProfessorCourse @relation(fields: [professorCourseId], references: [id])
+  overallRating       Int             @db.SmallInt
+  clarityRating       Int?            @db.SmallInt
+  accessibilityRating Int?            @db.SmallInt
+  fairnessRating      Int?            @db.SmallInt
+  workloadRating      Int?            @db.SmallInt
+  wouldTakeAgain      Boolean?
+  comment             String?
+  ipAddress           String
+  cookieId            String?
+  isApproved          Boolean         @default(false)
+  dateSubmitted       DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+}
+
+model Admin {
+  id        String    @id @default(uuid())
+  username  String    @unique
+  password  String
+  lastLogin DateTime?
+  logs      Log[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Log {
+  id        String   @id @default(uuid())
+  timestamp DateTime @default(now())
+  action    String
+  entityId  String?
+  adminId   String?
+  admin     Admin?   @relation(fields: [adminId], references: [id])
+  ipAddress String?
+  details   String?
+}
