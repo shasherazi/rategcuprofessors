@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -11,7 +12,9 @@ export default function Home() {
         Pressurize them to teach better
       </p>
 
-      <Button className="mt-4 cursor-pointer">Start rating</Button>
+      <Link href="/rating">
+        <Button className="mt-4 cursor-pointer">Start rating</Button>
+      </Link>
     </div>
   );
 }
